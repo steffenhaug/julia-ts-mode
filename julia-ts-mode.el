@@ -156,119 +156,7 @@ Otherwise, the indentation is:
 
 (defvar julia-ts--treesit-font-lock-settings
   (treesit-font-lock-rules
-   :language 'julia
-   :feature 'assignment
-   `((assignment (identifier) @font-lock-variable-name-face (_))
-     (assignment
-      (field_expression (identifier) "." (identifier) @font-lock-variable-name-face)
-      (operator))
-     (assignment (bare_tuple (identifier) @font-lock-variable-name-face))
-     (assignment
-      (bare_tuple
-       (field_expression (identifier) "." (identifier) @font-lock-variable-name-face))
-      (operator))
-     (local_statement (identifier) @font-lock-variable-name-face)
-     (let_binding (identifier) @font-lock-variable-name-face)
-     (global_statement (identifier) @font-lock-variable-name-face))
-
-   :language 'julia
-   :feature 'constant
-   `((quote_expression) @julia-ts-quoted-symbol-face
-     ((identifier) @font-lock-builtin-face
-      (:match
-       "^\\(:?NaN\\|NaN16\\|NaN32\\|NaN64\\|Inf\\|Inf16\\|Inf32\\|Inf64\\|nothing\\|missing\\|undef\\)$"
-       @font-lock-builtin-face)))
-
-   :language 'julia
-   :feature 'comment
-   `((line_comment) @font-lock-comment-face
-     (block_comment) @font-lock-comment-face)
-
-   :language 'julia
-   :feature 'definition
-   `((function_definition
-      name: (identifier) @font-lock-function-name-face)
-     (function_definition
-      name: (field_expression (identifier) "." (identifier) @font-lock-function-name-face))
-     (macro_definition
-      name: (identifier) @font-lock-function-name-face)
-     (short_function_definition
-      name: (identifier) @font-lock-function-name-face)
-     (short_function_definition
-      name: (field_expression (identifier) "." (identifier) @font-lock-function-name-face)))
-
-   :language 'julia
-   :feature 'error
-   :override t
-   `((ERROR) @font-lock-warning-face)
-
-   :language 'julia
-   :feature 'interpolation
-   :override 'append
-   `((interpolation_expression) @julia-ts-interpolation-expression-face
-     (string_interpolation) @julia-ts-string-interpolation-face)
-
-   :language 'julia
-   :feature 'keyword
-   `((abstract_definition) @font-lock-keyword-face
-     (break_statement) @font-lock-keyword-face
-     (continue_statement) @font-lock-keyword-face
-     (for_binding "in" @font-lock-keyword-face)
-     (import_statement ["import" "using"] @font-lock-keyword-face)
-     ((vector_expression
-       (range_expression
-        (identifier) @font-lock-keyword-face
-        (:match "^\\(:?begin\\|end\\)$" @font-lock-keyword-face))))
-     (struct_definition ["mutable" "struct"] @font-lock-keyword-face)
-     ([,@julia-ts--keywords]) @font-lock-keyword-face)
-
-   :language 'julia
-   :feature 'literal
-   `([(boolean_literal)
-      (character_literal)
-      (integer_literal)
-      (float_literal)] @font-lock-constant-face)
-
-   :language 'julia
-   :feature 'macro_call
-   `((macro_identifier) @julia-ts-macro-face)
-
-   :language 'julia
-   :feature 'operator
-   `((adjoint_expression "'" @font-lock-type-face)
-     (let_binding "=" @font-lock-type-face)
-     (for_binding ["=" "∈"] @font-lock-type-face)
-     (function_expression "->" @font-lock-type-face)
-     (operator) @font-lock-type-face
-     (slurp_parameter "..." @font-lock-type-face)
-     (splat_expression "..." @font-lock-type-face)
-     (ternary_expression ["?" ":"] @font-lock-type-face)
-     (["." "::"] @font-lock-type-face))
-
-   :language 'julia
-   :feature 'string
-   :override 'append
-   `([(command_literal)
-      (prefixed_command_literal)
-      (string_literal)
-      (prefixed_string_literal)] @font-lock-string-face)
-
-   ;; We need to override this feature because otherwise in statements like:
-   ;;     a::Union{Int, NTuple{4, Char}}
-   ;; the type is not fontified correctly due to the integer literal.
-   :language 'julia
-   :feature 'type
-   :override t
-   `((type_clause (operator) (_) @font-lock-type-face)
-     (typed_expression (_) "::" (_) @font-lock-type-face)
-     (typed_parameter
-      type: (_) @font-lock-type-face)
-     (where_clause "where"
-                   (curly_expression "{"
-                                     (binary_expression (identifier)
-                                                        (operator)
-                                                        (_)
-                                                        @font-lock-type-face)))))
+   )
   "Tree-sitter font-lock settings for `julia-ts-mode'.")
 
 (defvar julia-ts--treesit-indent-rules
@@ -382,6 +270,7 @@ Return nil if there is no name or if NODE is not a defun node."
   ;; tree-sitter.
   (setq-local syntax-propertize-function nil)
   (setq-local indent-line-function nil)
+  (setq-local font-lock-defaults nil)
 
   (treesit-parser-create 'julia)
 
