@@ -148,14 +148,58 @@ Otherwise, the indentation is:
   '((t :inherit font-lock-constant-face :weight bold))
   "Face for string interpolations in `julia-ts-mode', e.g. :foo.")
 
+;; (defvar julia-ts--keywords
+;;   '("baremodule" "begin" "catch" "const" "do" "else" "elseif" "end" "export"
+;;     "finally" "for" "function" "global" "if" "in" "let" "local" "macro" "module"
+;;     "quote" "return" "try" "where" "while" "public")
+;;   "Keywords for `julia-ts-mode'.")
+
 (defvar julia-ts--keywords
   '("baremodule" "begin" "catch" "const" "do" "else" "elseif" "end" "export"
-    "finally" "for" "function" "global" "if" "in" "let" "local" "macro" "module"
-    "quote" "return" "try" "where" "while")
+    "finally" "for" "function" "global"
+    "if" "let" "local" "macro" "module" "quote" "return" "try" "where" "while" "public"
+    "abstract" "type" "mutable" "struct"
+    )
   "Keywords for `julia-ts-mode'.")
 
 (defvar julia-ts--treesit-font-lock-settings
   (treesit-font-lock-rules
+
+   :language 'julia
+   :feature 'variable
+   '((identifier) @font-lock-variable-name-face)
+
+   :language 'julia
+   :override t
+   :feature 'symbol
+   '((quote_expression
+      ":"
+      [(identifier) (operator)])
+     @font-lock-keyword-face)
+
+   :language 'julia
+   :feature  'function
+   :override t
+   '((call_expression
+      (identifier) @font-lock-function-call-face))
+
+   :language 'julia
+   :feature  'function
+   :override t
+   '((broadcast_call_expression
+      (identifier) @font-lock-function-call-face))
+
+   :language 'julia
+   :feature  'type
+   :override t
+   '((type_head (identifier) @font-lock-type-face))
+
+   :language 'julia
+   :feature  'keyword
+   :override t
+   `([,@julia-ts--keywords] @font-lock-keyword-face
+     (for_binding (_) (operator) @font-lock-keyword-face (_))) ; `in` in for loops
+
    )
   "Tree-sitter font-lock settings for `julia-ts-mode'.")
 
@@ -298,7 +342,7 @@ Return nil if there is no name or if NODE is not a defun node."
   (setq-local treesit-font-lock-feature-list
               '((comment definition)
                 (constant keyword string type)
-                (assignment literal interpolation macro_call)
+                (assignment literal variable symbol function interpolation macro_call)
                 (error operator)))
 
   (treesit-major-mode-setup))
