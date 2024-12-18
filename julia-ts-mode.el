@@ -148,17 +148,16 @@ Otherwise, the indentation is:
   '((t :inherit font-lock-constant-face :weight bold))
   "Face for string interpolations in `julia-ts-mode', e.g. :foo.")
 
-;; (defvar julia-ts--keywords
-;;   '("baremodule" "begin" "catch" "const" "do" "else" "elseif" "end" "export"
-;;     "finally" "for" "function" "global" "if" "in" "let" "local" "macro" "module"
-;;     "quote" "return" "try" "where" "while" "public")
-;;   "Keywords for `julia-ts-mode'.")
+(defface julia-ts-boolean-face
+  '((t :inherit font-lock-builtin-face))
+  "Face for boolean literals in `julia-ts-mode`.")
 
 (defvar julia-ts--keywords
   '("baremodule" "begin" "catch" "const" "do" "else" "elseif" "end" "export"
     "finally" "for" "function" "global"
     "if" "let" "local" "macro" "module" "quote" "return" "try" "where" "while" "public"
     "abstract" "type" "mutable" "struct"
+    "import" "using" "as"
     )
   "Keywords for `julia-ts-mode'.")
 
@@ -168,6 +167,20 @@ Otherwise, the indentation is:
    :language 'julia
    :feature 'variable
    '((identifier) @font-lock-variable-name-face)
+
+   :language 'julia
+   :feature  'comment
+   '((line_comment) @font-lock-comment-face)
+
+   :language 'julia
+   :feature  'literal
+   '((integer_literal) @font-lock-number-face
+     (float_literal)   @font-lock-number-face
+     (boolean_literal) @julia-ts-boolean-face)
+
+   :language 'julia
+   :feature  'string
+   '((string_literal _ (content)) @font-lock-string-face)
 
    :language 'julia
    :override t
@@ -195,10 +208,22 @@ Otherwise, the indentation is:
    '((type_head (identifier) @font-lock-type-face))
 
    :language 'julia
+   :feature  'type
+   :override t
+   '((typed_expression (_) "::" (identifier) @font-lock-type-face))
+
+   :language 'julia
    :feature  'keyword
    :override t
    `([,@julia-ts--keywords] @font-lock-keyword-face
      (for_binding (_) (operator) @font-lock-keyword-face (_))) ; `in` in for loops
+
+   :language 'julia
+   :feature  'macro
+   :override t
+   '((macro_identifier "@" (identifier)) @font-lock-preprocessor-face)
+
+   
 
    )
   "Tree-sitter font-lock settings for `julia-ts-mode'.")
@@ -342,7 +367,7 @@ Return nil if there is no name or if NODE is not a defun node."
   (setq-local treesit-font-lock-feature-list
               '((comment definition)
                 (constant keyword string type)
-                (assignment literal variable symbol function interpolation macro_call)
+                (assignment literal variable symbol function interpolation macro)
                 (error operator)))
 
   (treesit-major-mode-setup))
